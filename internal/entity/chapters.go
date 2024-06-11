@@ -25,13 +25,13 @@ type Chapters struct {
 	Last_read            sql.NullString `json:"last_read,omitempty"`
 }
 
-func (manga *Chapters) GetMangas(db *sql.DB, logger *config.Logger) {
+func (manga *Chapters) GetAllChapters(db *sql.DB, logger *config.Logger) ([]Chapters, error) {
 	// Get all mangas from database
 	query := "SELECT * FROM chapters"
 	rows, err := db.Query(query)
 	if err != nil {
 		logger.Error(fmt.Sprintf("error querying database: %v", err))
-		return
+		return nil, err
 	}
 
 	defer rows.Close()
@@ -60,14 +60,58 @@ func (manga *Chapters) GetMangas(db *sql.DB, logger *config.Logger) {
 
 		if err != nil {
 			logger.Error(fmt.Sprintf("error scanning rows: %v", err))
-			return
+			return nil, err
 		}
 
 		mangas = append(mangas, manga)
 	}
 
-	for _, manga := range mangas {
-		formatedManga := fmt.Sprintf("ID: %d, Manga_id: %v, Slug: %v, Title: %v, Scans: %v \n", manga.ID.Int32, manga.Manga_id.Int32, manga.Slug.String, manga.Title, manga.Scanlators)
-		fmt.Println(formatedManga)
+	return mangas, nil
+}
+
+func (c *Chapters) GetChaptersByManga(id int, db *sql.DB, logger *config.Logger) ([]Chapters, error) {
+	query := "SELECT * FROM chapters WHERE manga_id = ?"
+	rows, err := db.Query(query, id)
+	if err != nil {
+		logger.Error(fmt.Sprintf("error querying database: %v", err))
+		return nil, err
 	}
+
+	defer rows.Close()
+
+	var chapters []Chapters
+	for rows.Next() {
+		var chapter Chapters
+
+		err = rows.Scan(
+			&chapter.ID,
+			&chapter.Manga_id,
+			&chapter.Slug,
+			&chapter.Url,
+			&chapter.Title,
+			&chapter.Scanlators,
+			&chapter.Pages,
+			&chapter.Date,
+			&chapter.Rank,
+			&chapter.Downloaded,
+			&chapter.Recent,
+			&chapter.Read_Progress,
+			&chapter.Read,
+			&chapter.Last_Page_Read_Index,
+			&chapter.Last_read,
+		)
+
+		if err != nil {
+			logger.Error(fmt.Sprintf("error scanning rows: %v", err))
+			return nil, err
+		}
+
+		chapters = append(chapters, chapter)
+	}
+
+	if len(chapters) == 0 {
+		return nil, fmt.Errorf("no chapters found for manga with id %d", id)
+	}
+
+	return chapters, nil
 }
