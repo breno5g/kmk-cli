@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/breno5g/kmk-cli/config"
+	"github.com/breno5g/kmk-cli/internal/entity"
 )
 
 func main() {
@@ -14,4 +15,6 @@ func main() {
 		return
 	}
 
+	var manga entity.Chapters
+	manga.GetMangas(config.GetDB(), logger)
 }

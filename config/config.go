@@ -12,18 +12,18 @@ var (
 
 func Init() error {
 	var err error
-	db, err = InitilizeSqlite()
-	if err != nil {
-		return fmt.Errorf("error initializing sqlite: %v", err)
-	}
 
 	err = LoadEnv()
 	if err != nil {
 		return fmt.Errorf("error loading env: %v", err)
 	}
 
-	return nil
+	db, err = InitilizeSqlite()
+	if err != nil {
+		return fmt.Errorf("error initializing sqlite: %v", err)
+	}
 
+	return nil
 }
 
 func GetLogger(prefix string) *Logger {
