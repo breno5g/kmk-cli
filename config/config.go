@@ -8,6 +8,7 @@ import (
 var (
 	logger *Logger
 	db     *sql.DB
+	paths  *Paths
 )
 
 func Init() error {
@@ -33,4 +34,8 @@ func GetLogger(prefix string) *Logger {
 
 func GetDB() *sql.DB {
 	return db
+}
+
+func GetPaths() *Paths {
+	return paths
 }
