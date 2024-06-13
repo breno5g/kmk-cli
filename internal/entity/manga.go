@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/breno5g/kmk-cli/config"
+	"github.com/breno5g/kmk-cli/pkg/errors"
 )
 
 type Manga struct {
@@ -34,7 +35,7 @@ func (m *Manga) GetAllMangas(db *sql.DB, logger *config.Logger) ([]Manga, error)
 	// Get all mangas from database
 	query := "SELECT * FROM mangas"
 	rows, err := db.Query(query)
-	if err != nil {
+	if errors.ValidError(err) {
 		logger.Error(fmt.Sprintf("error querying database: %v", err))
 		return nil, err
 	}
@@ -68,7 +69,7 @@ func (m *Manga) GetAllMangas(db *sql.DB, logger *config.Logger) ([]Manga, error)
 			&manga.Last_Update,
 		)
 
-		if err != nil {
+		if errors.ValidError(err) {
 			logger.Error(fmt.Sprintf("error scanning database: %v", err))
 			return nil, err
 		}

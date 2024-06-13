@@ -8,6 +8,7 @@ import (
 
 	"github.com/breno5g/kmk-cli/config"
 	"github.com/breno5g/kmk-cli/internal/entity"
+	"github.com/breno5g/kmk-cli/pkg/errors"
 	"github.com/urfave/cli/v2"
 )
 
@@ -26,7 +27,7 @@ func kmkInit() {
 				Action: func(ctx *cli.Context) error {
 					var mangas entity.Manga
 					res, err := mangas.GetAllMangas(db, logger)
-					if err != nil {
+					if errors.ValidError(err) {
 						logger.Errorf(fmt.Sprintf("Error getting all mangas: %v", err))
 						return err
 					}
@@ -45,13 +46,13 @@ func kmkInit() {
 				Usage:   "Get all manga chapters",
 				Action: func(ctx *cli.Context) error {
 					mangaId, err := strconv.Atoi(ctx.Args().First())
-					if err != nil {
+					if errors.ValidError(err) {
 						logger.Errorf(fmt.Sprintf("Please pass a valid manga id: %v", err))
 						return err
 					}
 					var chapters entity.Chapters
 					res, err := chapters.GetChaptersByManga(mangaId, db, logger)
-					if err != nil {
+					if errors.ValidError(err) {
 						logger.Error(err)
 						return nil
 					}
@@ -69,7 +70,7 @@ func kmkInit() {
 		},
 	}
 
-	if err := app.Run(os.Args); err != nil {
+	if err := app.Run(os.Args); errors.ValidError(err) {
 		log.Fatal(err)
 	}
 }
@@ -77,7 +78,7 @@ func kmkInit() {
 func main() {
 	err := config.Init()
 	logger := config.GetLogger("main")
-	if err != nil {
+	if errors.ValidError(err) {
 		logger.Error(fmt.Sprintf("error initializing config: %v", err))
 		return
 	}

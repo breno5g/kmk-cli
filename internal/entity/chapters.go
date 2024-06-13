@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/breno5g/kmk-cli/config"
+	"github.com/breno5g/kmk-cli/pkg/errors"
 )
 
 type Chapters struct {
@@ -29,7 +30,7 @@ func (c *Chapters) GetAllChapters(db *sql.DB, logger *config.Logger) ([]Chapters
 	// Get all mangas from database
 	query := "SELECT * FROM chapters"
 	rows, err := db.Query(query)
-	if err != nil {
+	if errors.ValidError(err) {
 		logger.Error(fmt.Sprintf("error querying database: %v", err))
 		return nil, err
 	}
@@ -58,7 +59,7 @@ func (c *Chapters) GetAllChapters(db *sql.DB, logger *config.Logger) ([]Chapters
 			&manga.Last_read,
 		)
 
-		if err != nil {
+		if errors.ValidError(err) {
 			logger.Error(fmt.Sprintf("error scanning rows: %v", err))
 			return nil, err
 		}
@@ -72,7 +73,7 @@ func (c *Chapters) GetAllChapters(db *sql.DB, logger *config.Logger) ([]Chapters
 func (c *Chapters) GetChaptersByManga(id int, db *sql.DB, logger *config.Logger) ([]Chapters, error) {
 	query := "SELECT * FROM chapters WHERE manga_id = ?"
 	rows, err := db.Query(query, id)
-	if err != nil {
+	if errors.ValidError(err) {
 		logger.Error(fmt.Sprintf("error querying database: %v", err))
 		return nil, err
 	}
@@ -101,7 +102,7 @@ func (c *Chapters) GetChaptersByManga(id int, db *sql.DB, logger *config.Logger)
 			&chapter.Last_read,
 		)
 
-		if err != nil {
+		if errors.ValidError(err) {
 			logger.Error(fmt.Sprintf("error scanning rows: %v", err))
 			return nil, err
 		}
