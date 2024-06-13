@@ -38,6 +38,28 @@ func kmkInit() {
 					return nil
 				},
 			},
+			{
+				Name:    "Get Chapters",
+				Aliases: []string{"gc"},
+				Usage:   "Get all manga chapters",
+				Action: func(ctx *cli.Context) error {
+					var chapters entity.Chapters
+					res, err := chapters.GetAllChapters(db, logger)
+					if err != nil {
+						logger.Errorf(fmt.Sprintf("Error getting all chapters: %v", err))
+						return err
+					}
+
+					fmt.Println("Chapters")
+					for _, chapter := range res {
+						formatedDate := fmt.Sprintf("%d/%02d/%d", chapter.Date.Time.Year(), int(chapter.Date.Time.Month()), chapter.Date.Time.Day())
+
+						formatedChapter := fmt.Sprintf("%d - %s - %s", chapter.ID.Int32, chapter.Title.String, formatedDate)
+						fmt.Println(formatedChapter)
+					}
+					return nil
+				},
+			},
 		},
 	}
 

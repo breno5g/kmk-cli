@@ -15,7 +15,7 @@ type Chapters struct {
 	Title                sql.NullString `json:"title,omitempty"`
 	Scanlators           []uint8        `json:"scanlators,omitempty"`
 	Pages                []uint8        `json:"pages,omitempty"`
-	Date                 sql.NullString `json:"date,omitempty"`
+	Date                 sql.NullTime   `json:"date,omitempty"`
 	Rank                 sql.NullInt32  `json:"rank,omitempty"`
 	Downloaded           sql.NullInt32  `json:"downloaded,omitempty"`
 	Recent               sql.NullInt32  `json:"recent,omitempty"`
