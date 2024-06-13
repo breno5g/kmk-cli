@@ -14,4 +14,15 @@ func main() {
 		return
 	}
 
+	// var mangas entity.Manga
+	// res, err := mangas.GetAllMangas(config.GetDB(), logger)
+	// if err != nil {
+	// 	logger.Error(fmt.Sprintf("error getting all mangas: %v", err))
+	// 	return
+	// }
+
+	// for _, manga := range res {
+	// 	formatedManga := fmt.Sprintf("Id: %d, Name: %s, Slug: %s", manga.ID, manga.Name.String, manga.Slug)
+	// 	fmt.Println(formatedManga)
+	// }
 }

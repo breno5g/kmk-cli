@@ -19,13 +19,13 @@ type Chapters struct {
 	Rank                 sql.NullInt32  `json:"rank,omitempty"`
 	Downloaded           sql.NullInt32  `json:"downloaded,omitempty"`
 	Recent               sql.NullInt32  `json:"recent,omitempty"`
-	Read_Progress        sql.NullInt32  `json:"read_progress,omitempty"`
+	Read_Progress        sql.NullString `json:"read_progress,omitempty"`
 	Read                 sql.NullInt32  `json:"read,omitempty"`
 	Last_Page_Read_Index sql.NullInt32  `json:"last_page_read_index,omitempty"`
 	Last_read            sql.NullString `json:"last_read,omitempty"`
 }
 
-func (manga *Chapters) GetAllChapters(db *sql.DB, logger *config.Logger) ([]Chapters, error) {
+func (c *Chapters) GetAllChapters(db *sql.DB, logger *config.Logger) ([]Chapters, error) {
 	// Get all mangas from database
 	query := "SELECT * FROM chapters"
 	rows, err := db.Query(query)
