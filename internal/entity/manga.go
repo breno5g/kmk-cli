@@ -79,3 +79,38 @@ func (m *Manga) GetAllMangas(db *sql.DB, logger *config.Logger) ([]Manga, error)
 
 	return mangas, nil
 }
+
+func (m *Manga) GetById(id int, db *sql.DB) (Manga, error) {
+	query := "SELECT * FROM mangas WHERE id = ?"
+	row := db.QueryRow(query, id)
+
+	var manga Manga
+	err := row.Scan(
+		&manga.ID,
+		&manga.Slug,
+		&manga.URL,
+		&manga.Server_Id,
+		&manga.In_Library,
+		&manga.Name,
+		&manga.Authors,
+		&manga.Scanlators,
+		&manga.Genres,
+		&manga.Synopsis,
+		&manga.Status,
+		&manga.Background_Color,
+		&manga.Border_Crop,
+		&manga.Landscape_Zoom,
+		&manga.Page_Numbering,
+		&manga.Reading_mode,
+		&manga.Scaling,
+		&manga.Sort_Order,
+		&manga.Last_Read,
+		&manga.Last_Update,
+	)
+
+	if errors.ValidError(err) {
+		return manga, err
+	}
+
+	return manga, nil
+}

@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/breno5g/kmk-cli/config"
+	"github.com/breno5g/kmk-cli/internal/helpers"
 	"github.com/breno5g/kmk-cli/pkg/errors"
 )
 
@@ -181,9 +182,80 @@ func (c *Chapters) GetChapterBySlug(slug string, db *sql.DB, logger *config.Logg
 	return chapter, nil
 }
 
-func (c *Chapters) Download(chapters []Chapters, logger *config.Logger) error {
+func (c *Chapters) GetBySlug(slug string, chapters []Chapters) (Chapters, error) {
 	for _, chapter := range chapters {
-		logger.Info(fmt.Sprintf("Downloading chapter %s", chapter.Title.String))
+		if chapter.Slug.String == slug {
+			return chapter, nil
+		}
+	}
+
+	return Chapters{}, fmt.Errorf("chapter with slug %s not found", slug)
+}
+
+func (c *Chapters) GetAllSlugs(chapters []Chapters) []string {
+	var names []string
+	for _, chapter := range chapters {
+		names = append(names, chapter.Slug.String)
+	}
+
+	return names
+}
+
+func (c *Chapters) Download(manga Manga, chapters []Chapters, logger *config.Logger) error {
+	mangaPath := fmt.Sprintf("%s/%s", config.GetPaths().Mangas, manga.Name.String)
+	dirs, err := helpers.GetDirsInside(mangaPath)
+	if errors.ValidError(err) {
+		logger.Error(fmt.Sprintf("error getting directories inside %s: %v", mangaPath, err))
+		return err
+	}
+
+	previousDownloadedChaptersPath := fmt.Sprintf("%s/%s", config.GetPaths().Ouput, manga.Name.String)
+	var previousDownloadedChapters []string
+	if helpers.CheckIfDirExists(previousDownloadedChaptersPath) {
+		previousDownloadedChapters, err = helpers.GetDirsInside(previousDownloadedChaptersPath)
+
+		if errors.ValidError(err) {
+			logger.Error(fmt.Sprintf("error getting directories inside %s: %v", previousDownloadedChaptersPath, err))
+			return err
+		}
+	} else {
+		helpers.CreateDirectory(previousDownloadedChaptersPath)
+	}
+
+	if len(dirs) == 0 {
+		logger.Info(fmt.Sprintf("no chapters to download for manga %s", manga.Name.String))
+		return nil
+	}
+
+	sortedDirs := helpers.SortDirsByChapters(dirs, c.GetAllSlugs(chapters))
+
+	for _, dir := range sortedDirs {
+		if helpers.Contains(previousDownloadedChapters, dir) {
+			logger.Info(fmt.Sprintf("chapter %s already downloaded", dir))
+			continue
+		}
+
+		chapter, err := c.GetBySlug(dir, chapters)
+		if errors.ValidError(err) {
+			logger.Error(fmt.Sprintf("error getting chapter by slug %s: %v", dir, err))
+			return err
+		}
+
+		if helpers.CheckIfDirExists(fmt.Sprintf("%s/%s", mangaPath, chapter.Title.String)) {
+			logger.Info(fmt.Sprintf("chapter %s already downloaded", chapter.Title.String))
+			continue
+		}
+
+		files, err := helpers.GetDirContent(fmt.Sprintf("%s/%s", mangaPath, dir))
+		if errors.ValidError(err) {
+			logger.Error(fmt.Sprintf("error getting directory content: %v", err))
+			return err
+		}
+
+		for _, file := range files {
+			fmt.Println(file)
+		}
+
 	}
 
 	return nil

@@ -72,3 +72,34 @@ func CreateDirectory(path string) error {
 
 	return nil
 }
+
+func MoveDirContent(src, dst string) error {
+	logger := config.GetLogger("directory handler")
+	err := os.Rename(src, dst)
+
+	if errors.ValidError(err) {
+		logger.Error(fmt.Sprintf("error moving directory content: %v", err))
+		return err
+	}
+
+	return nil
+}
+
+func GetDirContent(path string) ([]string, error) {
+	logger := config.GetLogger("directory handler")
+
+	var files []string
+
+	c, err := os.ReadDir(path)
+
+	if errors.ValidError(err) {
+		logger.Error(fmt.Sprintf("error walking through directories: %v", err))
+		return nil, err
+	}
+
+	for _, file := range c {
+		files = append(files, file.Name())
+	}
+
+	return files, nil
+}

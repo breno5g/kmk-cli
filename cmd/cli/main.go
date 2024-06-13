@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strconv"
 
 	"github.com/breno5g/kmk-cli/config"
 	"github.com/breno5g/kmk-cli/internal/entity"
@@ -43,13 +42,15 @@ func kmkInit() {
 			{
 				Name:    "Get Chapters",
 				Aliases: []string{"gc"},
-				Usage:   "Get all manga chapters",
+				Flags: []cli.Flag{
+					&cli.IntFlag{
+						Name:  "manga",
+						Usage: "Manga id",
+					},
+				},
+				Usage: "Get all manga chapters",
 				Action: func(ctx *cli.Context) error {
-					mangaId, err := strconv.Atoi(ctx.Args().First())
-					if errors.ValidError(err) {
-						logger.Errorf(fmt.Sprintf("Please pass a valid manga id: %v", err))
-						return err
-					}
+					mangaId := ctx.Int("manga")
 					var chapters entity.Chapters
 					res, err := chapters.GetChaptersByManga(mangaId, db, logger, 0, 0)
 					if errors.ValidError(err) {
@@ -90,8 +91,6 @@ func kmkInit() {
 					firstChapter := ctx.Int("first")
 					lastChapter := ctx.Int("last")
 
-					logger.Debug(fmt.Sprintf("mangaId: %d, firstChapter: %d, lastChapter: %d", mangaId, firstChapter, lastChapter))
-
 					var chapters entity.Chapters
 					res, err := chapters.GetChaptersByManga(mangaId, db, logger, firstChapter, lastChapter)
 					if errors.ValidError(err) {
@@ -99,7 +98,14 @@ func kmkInit() {
 						return nil
 					}
 
-					chapters.Download(res, logger)
+					var manga entity.Manga
+					manga, err = manga.GetById(mangaId, db)
+					if errors.ValidError(err) {
+						logger.Error(err)
+						return nil
+					}
+
+					chapters.Download(manga, res, logger)
 					return nil
 				},
 			},
