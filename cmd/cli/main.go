@@ -70,23 +70,27 @@ func kmkInit() {
 			{
 				Name:    "Download Chapters",
 				Aliases: []string{"dc"},
-				Usage:   "Download all manga chapters",
+				Flags: []cli.Flag{
+					&cli.IntFlag{
+						Name:  "manga",
+						Usage: "Manga id",
+					},
+					&cli.IntFlag{
+						Name:  "first",
+						Usage: "First chapter to download",
+					},
+					&cli.IntFlag{
+						Name:  "last",
+						Usage: "Last chapter to download",
+					},
+				},
+				Usage: "Download all manga chapters",
 				Action: func(ctx *cli.Context) error {
-					mangaId, err := strconv.Atoi(ctx.Args().First())
-					if errors.ValidError(err) {
-						logger.Errorf(fmt.Sprintf("Please pass a valid manga id: %v", err))
-						return err
-					}
-					firstChapter, err := strconv.Atoi(ctx.Args().Get(1))
-					if errors.ValidError(err) {
-						logger.Errorf(fmt.Sprintf("Please pass a valid first chapter: %v", err))
-						return err
-					}
-					lastChapter, err := strconv.Atoi(ctx.Args().Get(2))
-					if errors.ValidError(err) {
-						logger.Errorf(fmt.Sprintf("Please pass a valid last chapter: %v", err))
-						return err
-					}
+					mangaId := ctx.Int("manga")
+					firstChapter := ctx.Int("first")
+					lastChapter := ctx.Int("last")
+
+					logger.Debug(fmt.Sprintf("mangaId: %d, firstChapter: %d, lastChapter: %d", mangaId, firstChapter, lastChapter))
 
 					var chapters entity.Chapters
 					res, err := chapters.GetChaptersByManga(mangaId, db, logger, firstChapter, lastChapter)
@@ -95,11 +99,7 @@ func kmkInit() {
 						return nil
 					}
 
-					fmt.Println("Downloading chapters")
-					for _, chapter := range res {
-						formatedString := fmt.Sprintf("%d - %s", chapter.ID.Int32, chapter.Title.String)
-						fmt.Println(formatedString)
-					}
+					chapters.Download(res, logger)
 					return nil
 				},
 			},

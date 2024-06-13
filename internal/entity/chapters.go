@@ -74,8 +74,6 @@ func (c *Chapters) GetAllChapters(db *sql.DB, logger *config.Logger) ([]Chapters
 
 func (c *Chapters) GetChaptersByManga(id int, db *sql.DB, logger *config.Logger, firstChapter, lastChapter int) ([]Chapters, error) {
 	query := "SELECT * FROM chapters WHERE manga_id = ?"
-	logger.Info(fmt.Sprintf("firstChapter: %d, lastChapter: %d", firstChapter, lastChapter))
-
 	rows, err := db.Query(query, id)
 	if errors.ValidError(err) {
 		logger.Error(fmt.Sprintf("error querying database: %v", err))
@@ -181,4 +179,12 @@ func (c *Chapters) GetChapterBySlug(slug string, db *sql.DB, logger *config.Logg
 	}
 
 	return chapter, nil
+}
+
+func (c *Chapters) Download(chapters []Chapters, logger *config.Logger) error {
+	for _, chapter := range chapters {
+		logger.Info(fmt.Sprintf("Downloading chapter %s", chapter.Title.String))
+	}
+
+	return nil
 }
