@@ -6,12 +6,17 @@ import (
 
 type Paths struct {
 	Mangas string
+	Ouput  string
 }
 
 func InitilizeConstants() Paths {
-	var paths Paths
-	path := os.Getenv("MANGAS_PATH")
-	paths.Mangas = path
+	manga := os.Getenv("MANGAS_PATH")
+	output := os.Getenv("OUTPUT_PATH")
+
+	paths := Paths{
+		Mangas: manga,
+		Ouput:  output,
+	}
 
 	return paths
 }
