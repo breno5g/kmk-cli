@@ -1,4 +1,4 @@
-package handlers
+package helpers
 
 import (
 	"fmt"
@@ -26,4 +26,13 @@ func GetDirsInside(path string) ([]string, error) {
 	}
 
 	return dirs, nil
+}
+
+func ReverseDirs(dirs []string) []string {
+	var reversedDirs []string
+	for i := len(dirs) - 1; i >= 0; i-- {
+		reversedDirs = append(reversedDirs, dirs[i])
+	}
+
+	return reversedDirs
 }
