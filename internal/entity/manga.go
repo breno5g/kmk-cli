@@ -18,7 +18,7 @@ type Manga struct {
 	Scanlators       []uint8        `json:"scanlators,omitempty"`
 	Genres           []uint8        `json:"genres,omitempty"`
 	Synopsis         sql.NullString `json:"synopsis,omitempty"`
-	Statys           sql.NullString `json:"status,omitempty"`
+	Status           sql.NullString `json:"status,omitempty"`
 	Background_Color sql.NullString `json:"background_color,omitempty"`
 	Border_Crop      sql.NullString `json:"border_crop,omitempty"`
 	Landscape_Zoom   sql.NullInt64  `json:"landscape_zoom,omitempty"`
@@ -56,7 +56,7 @@ func (m *Manga) GetAllMangas(db *sql.DB, logger *config.Logger) ([]Manga, error)
 			&manga.Scanlators,
 			&manga.Genres,
 			&manga.Synopsis,
-			&manga.Statys,
+			&manga.Status,
 			&manga.Background_Color,
 			&manga.Border_Crop,
 			&manga.Landscape_Zoom,
