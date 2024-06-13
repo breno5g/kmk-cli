@@ -3,6 +3,8 @@ package entity
 import (
 	"database/sql"
 	"fmt"
+	"regexp"
+	"strconv"
 
 	"github.com/breno5g/kmk-cli/config"
 	"github.com/breno5g/kmk-cli/pkg/errors"
@@ -70,8 +72,10 @@ func (c *Chapters) GetAllChapters(db *sql.DB, logger *config.Logger) ([]Chapters
 	return mangas, nil
 }
 
-func (c *Chapters) GetChaptersByManga(id int, db *sql.DB, logger *config.Logger) ([]Chapters, error) {
+func (c *Chapters) GetChaptersByManga(id int, db *sql.DB, logger *config.Logger, firstChapter, lastChapter int) ([]Chapters, error) {
 	query := "SELECT * FROM chapters WHERE manga_id = ?"
+	logger.Info(fmt.Sprintf("firstChapter: %d, lastChapter: %d", firstChapter, lastChapter))
+
 	rows, err := db.Query(query, id)
 	if errors.ValidError(err) {
 		logger.Error(fmt.Sprintf("error querying database: %v", err))
@@ -110,9 +114,71 @@ func (c *Chapters) GetChaptersByManga(id int, db *sql.DB, logger *config.Logger)
 		chapters = append(chapters, chapter)
 	}
 
+	if firstChapter > 0 && lastChapter > 0 {
+		if len(chapters) != 0 {
+			var holder []Chapters
+			for _, chapter := range chapters {
+				re := regexp.MustCompile(`#(\d+)`)
+
+				matches := re.FindAllStringSubmatch(chapter.Title.String, -1)
+
+				if len(matches) > 0 {
+					for _, match := range matches {
+						pageNumber, err := strconv.Atoi(match[1])
+						if errors.ValidError(err) {
+							logger.Error(fmt.Sprintf("error converting page number to integer: %v", err))
+							return nil, err
+						}
+
+						if pageNumber >= firstChapter && pageNumber <= lastChapter {
+							holder = append(holder, chapter)
+						}
+					}
+				}
+			}
+
+			if len(holder) == 0 {
+				return nil, fmt.Errorf("no chapters found for manga with id %d", id)
+			}
+
+			return holder, nil
+		}
+	}
+
 	if len(chapters) == 0 {
 		return nil, fmt.Errorf("no chapters found for manga with id %d", id)
 	}
 
 	return chapters, nil
+}
+
+func (c *Chapters) GetChapterBySlug(slug string, db *sql.DB, logger *config.Logger) (Chapters, error) {
+	query := "SELECT * FROM chapters WHERE slug = ?"
+	row := db.QueryRow(query, slug)
+
+	var chapter Chapters
+	err := row.Scan(
+		&chapter.ID,
+		&chapter.Manga_id,
+		&chapter.Slug,
+		&chapter.Url,
+		&chapter.Title,
+		&chapter.Scanlators,
+		&chapter.Pages,
+		&chapter.Date,
+		&chapter.Rank,
+		&chapter.Downloaded,
+		&chapter.Recent,
+		&chapter.Read_Progress,
+		&chapter.Read,
+		&chapter.Last_Page_Read_Index,
+		&chapter.Last_read,
+	)
+
+	if errors.ValidError(err) {
+		logger.Error(fmt.Sprintf("error scanning row: %v", err))
+		return chapter, err
+	}
+
+	return chapter, nil
 }

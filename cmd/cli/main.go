@@ -34,7 +34,7 @@ func kmkInit() {
 
 					fmt.Println("Mangas")
 					for _, manga := range res {
-						formatedManga := fmt.Sprintf("%d - %s - %s", manga.ID, manga.Name.String, manga.Status.String)
+						formatedManga := fmt.Sprintf("%d - %s - %s - %s", manga.ID, manga.Name.String, manga.Status.String, manga.Server_Id.String)
 						fmt.Println(formatedManga)
 					}
 					return nil
@@ -51,7 +51,7 @@ func kmkInit() {
 						return err
 					}
 					var chapters entity.Chapters
-					res, err := chapters.GetChaptersByManga(mangaId, db, logger)
+					res, err := chapters.GetChaptersByManga(mangaId, db, logger, 0, 0)
 					if errors.ValidError(err) {
 						logger.Error(err)
 						return nil
@@ -63,6 +63,42 @@ func kmkInit() {
 
 						formatedChapter := fmt.Sprintf("%d - %s - %s", chapter.ID.Int32, chapter.Title.String, formatedDate)
 						fmt.Println(formatedChapter)
+					}
+					return nil
+				},
+			},
+			{
+				Name:    "Download Chapters",
+				Aliases: []string{"dc"},
+				Usage:   "Download all manga chapters",
+				Action: func(ctx *cli.Context) error {
+					mangaId, err := strconv.Atoi(ctx.Args().First())
+					if errors.ValidError(err) {
+						logger.Errorf(fmt.Sprintf("Please pass a valid manga id: %v", err))
+						return err
+					}
+					firstChapter, err := strconv.Atoi(ctx.Args().Get(1))
+					if errors.ValidError(err) {
+						logger.Errorf(fmt.Sprintf("Please pass a valid first chapter: %v", err))
+						return err
+					}
+					lastChapter, err := strconv.Atoi(ctx.Args().Get(2))
+					if errors.ValidError(err) {
+						logger.Errorf(fmt.Sprintf("Please pass a valid last chapter: %v", err))
+						return err
+					}
+
+					var chapters entity.Chapters
+					res, err := chapters.GetChaptersByManga(mangaId, db, logger, firstChapter, lastChapter)
+					if errors.ValidError(err) {
+						logger.Error(err)
+						return nil
+					}
+
+					fmt.Println("Downloading chapters")
+					for _, chapter := range res {
+						formatedString := fmt.Sprintf("%d - %s", chapter.ID.Int32, chapter.Title.String)
+						fmt.Println(formatedString)
 					}
 					return nil
 				},
