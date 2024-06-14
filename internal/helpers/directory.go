@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/breno5g/kmk-cli/config"
@@ -75,7 +76,24 @@ func CreateDirectory(path string) error {
 
 func MoveDirContent(src, dst string) error {
 	logger := config.GetLogger("directory handler")
-	err := os.Rename(src, dst)
+	sourceFile, err := os.Open(src)
+
+	if errors.ValidError(err) {
+		logger.Error(fmt.Sprintf("error opening source file: %v", err))
+		return err
+	}
+	defer sourceFile.Close()
+
+	destination, err := os.Create(dst)
+
+	if errors.ValidError(err) {
+		logger.Error(fmt.Sprintf("error creating destination file: %v", err))
+		return err
+	}
+
+	defer destination.Close()
+
+	_, err = io.Copy(destination, sourceFile)
 
 	if errors.ValidError(err) {
 		logger.Error(fmt.Sprintf("error moving directory content: %v", err))

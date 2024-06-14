@@ -241,9 +241,16 @@ func (c *Chapters) Download(manga Manga, chapters []Chapters, logger *config.Log
 			return err
 		}
 
-		if helpers.CheckIfDirExists(fmt.Sprintf("%s/%s", mangaPath, chapter.Title.String)) {
+		outputPath := previousDownloadedChaptersPath
+		if helpers.CheckIfDirExists(fmt.Sprintf("%s/%s", outputPath, chapter.Title.String)) {
 			logger.Info(fmt.Sprintf("chapter %s already downloaded", chapter.Title.String))
 			continue
+		} else {
+			err = helpers.CreateDirectory(fmt.Sprintf("%s/%s", outputPath, chapter.Title.String))
+			if errors.ValidError(err) {
+				logger.Error(fmt.Sprintf("error creating directory %s: %v", chapter.Title.String, err))
+				return err
+			}
 		}
 
 		files, err := helpers.GetDirContent(fmt.Sprintf("%s/%s", mangaPath, dir))
@@ -252,10 +259,14 @@ func (c *Chapters) Download(manga Manga, chapters []Chapters, logger *config.Log
 			return err
 		}
 
+		logger.Infof("moving %s \n", chapter.Title.String)
 		for _, file := range files {
-			fmt.Println(file)
+			err = helpers.MoveDirContent(fmt.Sprintf("%s/%s/%s", mangaPath, dir, file), fmt.Sprintf("%s/%s/%s", outputPath, chapter.Title.String, file))
+			if errors.ValidError(err) {
+				logger.Error(fmt.Sprintf("error moving directory content: %v", err))
+				return err
+			}
 		}
-
 	}
 
 	return nil
