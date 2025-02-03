@@ -107,9 +107,11 @@ func (m *Manga) GetById(id int, db *sql.DB) (Manga, error) {
 		&manga.Page_Numbering,
 		&manga.Reading_mode,
 		&manga.Scaling,
+		&manga.ScalingFilter,
 		&manga.Sort_Order,
 		&manga.Last_Read,
 		&manga.Last_Update,
+		&manga.Tracking,
 	)
 
 	if errors.ValidError(err) {
