@@ -26,9 +26,11 @@ type Manga struct {
 	Page_Numbering   sql.NullString `json:"page_numbering,omitempty"`
 	Reading_mode     sql.NullString `json:"reading_mode,omitempty"`
 	Scaling          sql.NullString `json:"scaling,omitempty"`
+	ScalingFilter    sql.NullString `json:"scaling_filter,omitempty"`
 	Sort_Order       sql.NullString `json:"sort_order,omitempty"`
 	Last_Read        sql.NullTime   `json:"last_read,omitempty"`
 	Last_Update      sql.NullTime   `json:"last_update,omitempty"`
+	Tracking         sql.NullString `json:"tracking,omitempty"`
 }
 
 func (m *Manga) GetAllMangas(db *sql.DB, logger *config.Logger) ([]Manga, error) {
@@ -64,9 +66,11 @@ func (m *Manga) GetAllMangas(db *sql.DB, logger *config.Logger) ([]Manga, error)
 			&manga.Page_Numbering,
 			&manga.Reading_mode,
 			&manga.Scaling,
+			&manga.ScalingFilter,
 			&manga.Sort_Order,
 			&manga.Last_Read,
 			&manga.Last_Update,
+			&manga.Tracking,
 		)
 
 		if errors.ValidError(err) {
