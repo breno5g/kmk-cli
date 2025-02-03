@@ -20,6 +20,8 @@ type Chapters struct {
 	Scanlators           []uint8        `json:"scanlators,omitempty"`
 	Pages                []uint8        `json:"pages,omitempty"`
 	Date                 sql.NullTime   `json:"date,omitempty"`
+	Num                  sql.NullInt32  `json:"num,omitempty"`
+	Num_Volume           sql.NullInt32  `json:"num_volume,omitempty"`
 	Rank                 sql.NullInt32  `json:"rank,omitempty"`
 	Downloaded           sql.NullInt32  `json:"downloaded,omitempty"`
 	Recent               sql.NullInt32  `json:"recent,omitempty"`
@@ -53,6 +55,8 @@ func (c *Chapters) GetAllChapters(db *sql.DB, logger *config.Logger) ([]Chapters
 			&manga.Scanlators,
 			&manga.Pages,
 			&manga.Date,
+			&manga.Num,
+			&manga.Num_Volume,
 			&manga.Rank,
 			&manga.Downloaded,
 			&manga.Recent,
@@ -96,6 +100,8 @@ func (c *Chapters) GetChaptersByManga(id int, db *sql.DB, logger *config.Logger,
 			&chapter.Scanlators,
 			&chapter.Pages,
 			&chapter.Date,
+			&chapter.Num,
+			&chapter.Num_Volume,
 			&chapter.Rank,
 			&chapter.Downloaded,
 			&chapter.Recent,
